@@ -17,6 +17,7 @@ final class ProductController extends AbstractController
         if (!$product) {
             return $this->redirectToRoute('app_home');
         }
+        //dd($product);
 
         return $this->render('product/index.html.twig', [
             'product' => $product,
