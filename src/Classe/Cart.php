@@ -55,6 +55,46 @@ class Cart
     }
 
     /*
+     * fullQuantity()
+     * Fonction retournant le nombre total de produit au panier
+     */
+    public function fullQuantity()
+    {
+        $cart = $this->getCart();
+        $quantity = 0;
+
+        if (!isset($cart)) {
+            return $quantity;
+        }
+
+        foreach ($cart as $product) {
+            $quantity = $quantity + $product['qty'];
+        }
+
+        return $quantity;
+    }
+
+    /*
+     * getTotalWt()
+     * Fonction retournant le prix total des produits au panier
+     */
+    public function getTotalWt()
+    {
+        $cart = $this->getCart();
+        $price = 0;
+
+        if (!isset($cart)) {
+            return $price;
+        }
+
+        foreach ($cart as $product) {
+            $price = $price + ($product['object']->getPriceWt() * $product['qty']);
+        }
+
+        return $price;
+    }
+
+    /*
      * remove()
      * Fonction permettant de supprimer totalement le panier
      */

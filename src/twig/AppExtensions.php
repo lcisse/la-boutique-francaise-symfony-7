@@ -11,12 +11,12 @@ use Twig\TwigFilter;
 class AppExtensions extends AbstractExtension implements GlobalsInterface
 {
     private $categoryRepository;
-   // private $cart;
+    private $cart;
 
-    public function __construct(CategoryRepository $categoryRepository/*, Cart $cart*/)
+    public function __construct(CategoryRepository $categoryRepository, Cart $cart)
     {
         $this->categoryRepository = $categoryRepository;
-        //$this->cart = $cart;
+        $this->cart = $cart;
     }
 
     public function getFilters()
@@ -35,7 +35,7 @@ class AppExtensions extends AbstractExtension implements GlobalsInterface
     {
         return [
             'allCategories' => $this->categoryRepository->findAll(),
-            //'fullCartQuantity' => $this->cart->fullQuantity()
+            'fullCartQuantity' => $this->cart->fullQuantity()
        ];
     }
 
