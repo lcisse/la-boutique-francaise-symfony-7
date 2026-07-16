@@ -38,6 +38,32 @@ class Cart
     }
 
     /*
+     * decrease()
+     * Fonction permettant la suppression d'une quantity d'un produit au panier
+     */
+    public function decrease($id)
+    {
+        $cart = $this->getCart();
+
+        if ($cart[$id]['qty'] > 1) {
+            $cart[$id]['qty'] = $cart[$id]['qty'] - 1;
+        } else {
+            unset($cart[$id]);
+        }
+
+        $this->requestStack->getSession()->set('cart', $cart);
+    }
+
+    /*
+     * remove()
+     * Fonction permettant de supprimer totalement le panier
+     */
+    public function remove()
+    {
+        return $this->requestStack->getSession()->remove('cart');
+    }
+
+    /*
      * getCart()
      * Fonction retournant le panier
      */
