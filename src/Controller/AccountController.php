@@ -2,7 +2,11 @@
 
 namespace App\Controller;
 
+use App\Classe\Cart;
+use App\Entity\Address;
+use App\Form\AddressUserType;
 use App\Form\PasswordUserType;
+use App\Repository\AddressRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,6 +16,13 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class AccountController extends AbstractController
 {
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
     #[Route('/compte', name: 'app_account')]
     public function index(): Response
     {
@@ -19,7 +30,7 @@ final class AccountController extends AbstractController
     }
 
     #[Route('/compte/modifier-mot-de-passe', name: 'app_account_modify_pwd')]
-    public function password(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): Response
+    public function password(Request $request, UserPasswordHasherInterface $passwordHasher): Response
     {
         $user = $this->getUser();
 
@@ -30,7 +41,7 @@ final class AccountController extends AbstractController
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+            $this->entityManager->flush();
 
             $this->addFlash(
                 type: 'success',
@@ -40,6 +51,68 @@ final class AccountController extends AbstractController
 
         return $this->render('account/password.html.twig', [
             'modifyPwd' => $form->createView()
+        ]);
+    }
+
+    #[Route('/compte/adresses', name: 'app_account_addresses')]
+    public function addresses(): Response
+    {
+        return $this->render('account/addresses.html.twig');
+    }
+
+    #[Route('/compte/adresses/delete/{id}', name: 'app_account_address_delete')]
+    public function delete($id, AddressRepository $addressRepository): Response
+    {
+        $address = $addressRepository->findOneById($id);
+        if (!$address OR $address->getUser() != $this->getUser()) {
+            return $this->redirectToRoute('app_account_addresses');
+        }
+        $this->addFlash(
+            'success',
+            "Votre adresse est correctement supprimée."
+        );
+
+        $this->entityManager->remove($address);
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('app_account_addresses');
+    }
+
+    #[Route('/compte/adresse/ajouter/{id}', name: 'app_account_address_form', defaults: ['id' => null] )]
+    public function form(Request $request, $id, AddressRepository $addressRepository, Cart $cart): Response
+    {
+        if ($id) {
+            $address = $addressRepository->findOneById($id);
+            if (!$address OR $address->getUser() != $this->getUser()) {
+                return $this->redirectToRoute('app_account_addresses');
+            }
+        } else {
+            $address = new Address();
+            $address->setUser($this->getUser());
+        }
+
+        $form = $this->createForm(AddressUserType::class, $address);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->persist($address);
+            $this->entityManager->flush();
+
+            $this->addFlash(
+                'success',
+                "Votre adresse est correctement sauvegardée."
+            );
+
+            /*if ($cart->fullQuantity() > 0) {
+                return $this->redirectToRoute("app_order");
+            }*/
+
+            return $this->redirectToRoute("app_account_addresses");
+        }
+
+        return $this->render('account/addressForm.html.twig', [
+            'addressForm' => $form
         ]);
     }
 }
