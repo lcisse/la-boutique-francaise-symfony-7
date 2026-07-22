@@ -72,9 +72,9 @@ class AddressController extends AbstractController
                 "Votre adresse est correctement sauvegardée."
             );
 
-            /*if ($cart->fullQuantity() > 0) {
+            if ($cart->fullQuantity() > 0) {
                 return $this->redirectToRoute("app_order");
-            }*/
+            }
 
             return $this->redirectToRoute("app_account_addresses");
         }
