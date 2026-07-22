@@ -28,12 +28,47 @@ final class OrderController extends AbstractController
         }
 
         $form = $this->createForm(OrderType::class, null, [
-            'addresses' => $addresses /*,
-            'action' => $this->generateUrl('app_order_summary')*/
+            'addresses' => $addresses,
+            'action' => $this->generateUrl('app_order_summary')
         ]);
 
         return $this->render('order/index.html.twig', [
             'deliverForm' => $form->createView(),
+        ]);
+    }
+
+    /*
+     * 2ème étape du tunnel d'achat
+     * Récap de la commande de l'utilisateur
+     * Insertion en base de donnée
+     * Préparation du paiement vers Stripe
+     */
+    #[Route('/commande/recapitulatif', name: 'app_order_summary')]
+    public function add(Request $request, Cart $cart, EntityManagerInterface $entityManager): Response
+    {
+        if ($request->getMethod() != 'POST') {
+            return $this->redirectToRoute('app_cart');
+        }
+
+        $products = $cart->getCart();
+
+        $form = $this->createForm(OrderType::class, null, [
+            'addresses' => $this->getUser()->getAddresses(),
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Stocker les informations en BDD
+
+
+        }
+
+        return $this->render('order/summary.html.twig', [
+            'choices' => $form->getData(),
+            'cart' => $products,
+            //'order' => $order,
+            'totalWt' => $cart->getTotalWt()
         ]);
     }
 }
