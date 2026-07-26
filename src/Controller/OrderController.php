@@ -61,6 +61,35 @@ final class OrderController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // Stocker les informations en BDD
 
+            // Création de la chaîne adresse
+            $addressObj = $form->get('addresses')->getData();
+
+            $address = $addressObj->getFirstname().' '.$addressObj->getLastname().'<br/>';
+            $address .= $addressObj->getAddress().'<br/>';
+            $address .= $addressObj->getPostal().' '.$addressObj->getCity().'<br/>';
+            $address .= $addressObj->getCountry().'<br/>';
+            $address .= $addressObj->getPhone();
+
+            $order = new Order();
+            //$order->setUser($this->getUser());
+            $order->setCreatedAt(new \DateTime());
+            $order->setState(1);
+            $order->setCarrierName($form->get('carriers')->getData()->getName());
+            $order->setCarrierPrice($form->get('carriers')->getData()->getPrice());
+            $order->setDelivery($address);
+
+            foreach ($products as $product) {
+                $orderDetail = new OrderDetail();
+                $orderDetail->setProductName($product['object']->getName());
+                $orderDetail->setProductIllustration($product['object']->getIllustration());
+                $orderDetail->setProductPrice($product['object']->getPrice());
+                $orderDetail->setProductTva($product['object']->getTva());
+                $orderDetail->setProductQuantity($product['qty']);
+                $order->addOrderDetail($orderDetail);
+            }
+
+            $entityManager->persist($order);
+            $entityManager->flush();
 
         }
 
