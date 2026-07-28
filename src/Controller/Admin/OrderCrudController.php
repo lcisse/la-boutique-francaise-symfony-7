@@ -3,9 +3,11 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Order;
+use App\Repository\OrderRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
@@ -13,6 +15,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Component\HttpFoundation\Response;
 
 class OrderCrudController extends AbstractCrudController
 {
@@ -26,7 +30,6 @@ class OrderCrudController extends AbstractCrudController
         return $crud
             ->setEntityLabelInSingular('Commande')
             ->setEntityLabelInPlural('Commandes')
-            // ...
         ;
     }
 
@@ -35,10 +38,48 @@ class OrderCrudController extends AbstractCrudController
         $show = Action::new('Afficher')->linkToCrudAction('show');
 
         return $actions
-            //->add(Crud::PAGE_INDEX, $show)
+            ->add(Crud::PAGE_INDEX, $show)
             ->remove(Crud::PAGE_INDEX, Action::NEW)
             ->remove(Crud::PAGE_INDEX, Action::EDIT)
             ->remove(Crud::PAGE_INDEX, Action::DELETE);
+    }
+
+    /*public function show(AdminContext $context/, AdminUrlGenerator $adminUrlGenerator, Request $request/)
+    {
+        $order = $context->getEntity()->getInstance();
+        dd($order);
+
+
+        // Récupérer l'URL de notre action "SHOW"
+        /$url = $adminUrlGenerator->setController(self::class)->setAction('show')->setEntityId($order->getId())->generateUrl();
+
+        // Traitement des changements de statut
+        if ($request->get('state')) {
+            $this->changeState($order,$request->get('state'));
+        }/
+
+
+        return $this->render('admin/order.html.twig', [
+            'order' => $order/,
+            'current_url' => $url/
+        ]);
+    }*/
+
+    public function show(AdminContext $context, OrderRepository $orderRepository): Response 
+    {
+        $orderId = $context->getRequest()->query->get('entityId');
+
+        $order = $orderRepository->find($orderId);
+
+        if (!$order) {
+            throw $this->createNotFoundException(
+                'La commande est introuvable.'
+            );
+        }
+
+        return $this->render('admin/order.html.twig', [
+            'order' => $order,
+        ]);
     }
 
     public function configureFields(string $pageName): iterable
@@ -46,11 +87,11 @@ class OrderCrudController extends AbstractCrudController
         return [
             IdField::new('id'),
             DateField::new('createdAt')->setLabel('Date'),
-            NumberField::new('state')->setLabel('Statut')/*->setTemplatePath('admin/state.html.twig')*/,
+            NumberField::new('state')->setLabel('Statut')->setTemplatePath('admin/state.html.twig'),
             AssociationField::new('user')->setLabel('Utilisateur'),
-            TextField::new('carrierName')->setLabel('Transporteur')/*,
+            TextField::new('carrierName')->setLabel('Transporteur'),
             NumberField::new('totalTva')->setLabel('Total TVA'),
-            NumberField::new('totalWt')->setLabel('Total TTC'),*/
+            NumberField::new('totalWt')->setLabel('Total TTC'),
         ];
     }
 }
