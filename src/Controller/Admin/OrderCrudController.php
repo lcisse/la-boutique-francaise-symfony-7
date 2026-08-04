@@ -16,6 +16,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class OrderCrudController extends AbstractCrudController
@@ -65,7 +66,7 @@ class OrderCrudController extends AbstractCrudController
         ]);
     }*/
 
-    public function show(AdminContext $context, OrderRepository $orderRepository): Response 
+    public function show(AdminContext $context, OrderRepository $orderRepository, AdminUrlGenerator $adminUrlGenerator, Request $request): Response 
     {
         $orderId = $context->getRequest()->query->get('entityId');
 
@@ -77,8 +78,18 @@ class OrderCrudController extends AbstractCrudController
             );
         }
 
+        // Récupérer l'URL de notre action "SHOW"
+        $url = $adminUrlGenerator->setController(self::class)->setAction('show')->setEntityId($order->getId())->generateUrl();
+
+        // Traitement des changements de statut
+        /*if ($request->get('state')) {
+            $this->changeState($order,$request->get('state'));
+        }*/
+
         return $this->render('admin/order.html.twig', [
             'order' => $order,
+            'current_url' => $url
+            
         ]);
     }
 

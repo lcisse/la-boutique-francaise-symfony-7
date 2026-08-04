@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260727114327 extends AbstractMigration
+final class Version20260804134109 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,13 +21,7 @@ final class Version20260727114327 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            ALTER TABLE `order` ADD user_id INT NOT NULL
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE `order` ADD CONSTRAINT FK_F5299398A76ED395 FOREIGN KEY (user_id) REFERENCES `user` (id)
-        SQL);
-        $this->addSql(<<<'SQL'
-            CREATE INDEX IDX_F5299398A76ED395 ON `order` (user_id)
+            ALTER TABLE `order` ADD stripe_session_id LONGTEXT DEFAULT NULL
         SQL);
     }
 
@@ -41,7 +35,7 @@ final class Version20260727114327 extends AbstractMigration
             DROP INDEX IDX_F5299398A76ED395 ON `order`
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE `order` DROP user_id
+            ALTER TABLE `order` DROP stripe_session_id
         SQL);
     }
 }
