@@ -86,11 +86,9 @@ final class PaymentController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
-        //dd($order);
-
         if ($order->getState() == 1) {
             $order->setState(2);
-            //$cart->remove();
+            $cart->remove();
             $entityManager->flush();
         }
 
