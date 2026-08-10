@@ -14,8 +14,8 @@ final class HomeController extends AbstractController
     public function index(HeaderRepository $headerRepository, ProductRepository $productRepository): Response
     {
         return $this->render('home/index.html.twig', [
-            'headers' => $headerRepository->findAll()/*,
-            'productsInHomepage' => $productRepository->findByIsHomepage(true)*/
+            'headers' => $headerRepository->findAll(),
+            'productsInHomepage' => $productRepository->findByIsHomepage(true)
         ]);
     }
 }
